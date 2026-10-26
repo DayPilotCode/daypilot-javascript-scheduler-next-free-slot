@@ -4,13 +4,20 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JavaScript Scheduler: Find Next Free Slot</title>
-  <link href="index.css" type="text/css" rel="stylesheet" />
 
   <style>
-    body .scheduler_default_rowheader_inner {
-      padding-right: 30px;
-    }
-
+    p, body, td, input, select, button { font-family: -apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; font-size: 14px; }
+    body { padding: 0px; margin: 0px; background-color: #ffffff; }
+    a { color: #1155a3; }
+    .space { margin: 10px 0px 10px 0px; }
+    .header { background: #003267; background: linear-gradient(to right, #011329 0%,#00639e 44%,#011329 100%); padding:20px 10px; color: white; box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.75); }
+    .header a { color: white; }
+    .header h1 a { text-decoration: none; }
+    .header h1 { padding: 0px; margin: 0px; }
+    .main { padding: 10px; margin-top: 10px; }
+    .generated { color: #999; }
+    .generated a { color: #999; }
+    body .scheduler_default_rowheader_inner { padding-right: 30px; }
     body .scheduler_default_event_inner {
       background: #fcb71199;
       border-radius: 5px;
@@ -19,16 +26,11 @@
     }
   </style>
 
-  <!-- DayPilot library -->
-  <script src="js/daypilot/daypilot-all.min.js"></script>
 </head>
 <body>
 <div class="header">
-  <h1><a href='https://code.daypilot.org/94263/javascript-scheduler-find-next-free-slot'>JavaScript Scheduler: Find Next
-    Free Slot</a></h1>
-  <div><a href="https://javascript.daypilot.org/">DayPilot for JavaScript</a> - HTML5 Calendar/Scheduling Components for
-    JavaScript/Angular/React/Vue
-  </div>
+  <h1><a href='https://code.daypilot.org/94263/javascript-scheduler-find-next-free-slot'>JavaScript Scheduler: Find Next Free Slot</a></h1>
+  <div><a href="https://javascript.daypilot.org/">DayPilot for JavaScript</a> - HTML5 Calendar/Scheduling Components for JavaScript/Angular/React/Vue</div>
 </div>
 
 <div class="main">
@@ -36,120 +38,7 @@
   <div class="generated">Generated using <a href="https://builder.daypilot.org/">DayPilot UI Builder</a>.</div>
 </div>
 
-<script>
-  const scheduler = new DayPilot.Scheduler("dp", {
-    timeHeaders: [{"groupBy": "Month"}, {"groupBy": "Day", "format": "d"}],
-    scale: "Day",
-    days: 150,
-    cellWidth: 60,
-    eventHeight: 60,
-    durationBarVisible: false,
-    rowMarginBottom: 3,
-    rowMarginTop: 3,
-    rowHeaderWidth: 120,
-    startDate: new DayPilot.Date("2025-04-01"),
-    timeRangeSelectedHandling: "Enabled",
-    onTimeRangeSelected: async args => {
-      const modal = await DayPilot.Modal.prompt("Create a new event:", "Event 1")
-      scheduler.clearSelection();
-      if (modal.canceled) {
-        return;
-      }
-      scheduler.events.add({
-        start: args.start,
-        end: args.end,
-        id: DayPilot.guid(),
-        resource: args.resource,
-        text: modal.result
-      });
-    },
-    treeEnabled: true,
-    onBeforeRowHeaderRender: args => {
-      args.row.areas = [
-        {
-          right: 6,
-          top: "calc(50% - 8px)",
-          height: 16,
-          width: 16,
-          visibility: "Hover",
-          symbol: "icons/daypilot.svg#minichevron-right-2",
-          backColor: "#4caf50",
-          fontColor: "#ffffff",
-          borderRadius: 3,
-          style: "cursor: pointer;",
-          toolTip: "Find next free slot",
-          onClick: () => {
-            const start = scheduler.getViewport().start;
-
-            // search only upcoming events
-            const events = args.row.events.all().filter(e => e.start() >= start);
-            if (events.length === 0) {
-              return;
-            }
-
-            // find the first event the current position is at free slot
-            let pos = start;
-            if (events[0].start() >= pos) {
-              pos = events[0].start();
-            }
-
-            events.some(e => {
-              const isThereEvent = DayPilot.Util.overlaps(e.start(), e.end(), pos, pos.addSeconds(1));
-              if (isThereEvent) {
-                pos = e.end();
-              } else {
-                return true;
-              }
-            });
-
-            scheduler.scrollTo(pos);
-          }
-        }
-      ];
-    }
-  });
-  scheduler.init();
-
-  const app = {
-    loadData() {
-      const resources = [
-        {name: "Resource 1", id: "R1"},
-        {name: "Resource 2", id: "R2"},
-        {name: "Resource 3", id: "R3"},
-        {name: "Resource 4", id: "R4"},
-        {name: "Resource 5", id: "R5"},
-        {name: "Resource 6", id: "R6"},
-        {name: "Resource 7", id: "R7"},
-        {name: "Resource 8", id: "R8"},
-        {name: "Resource 9", id: "R9"},
-      ];
-
-      // add a sequence of events with random spaces
-      const events = [];
-      let start = scheduler.startDate;
-      for (let i = 1; i < 100; i++) {
-        const durationDays = Math.floor(Math.random() * 3) + 1; // 1 to 3
-        const end = start.addDays(durationDays);
-        const e = {
-          start: start,
-          end: end,
-          id: i,
-          resource: "R2",
-          text: "Event " + i
-        };
-        start = end;
-        const add = Math.random() > 0.2;
-        if (add) {
-          events.push(e);
-        }
-      }
-
-      scheduler.update({resources, events});
-    }
-  };
-  app.loadData();
-
-</script>
+<script type="module" src="/src/app.js"></script>
 
 </body>
 </html>
